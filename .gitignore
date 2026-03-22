@@ -1,3 +1,7 @@
 .venv/
 __pycache__/
-*.pyc
+.cache
+*.json
+*.jpg
+*.png
+.env
