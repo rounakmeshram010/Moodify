@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moodify - Music Based on Your Mood</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #121212 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .container {
+            background: #181818;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        #authContainer {
+            display: block;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1DB954;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #b3b3b3;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .auth-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b3b3b3;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #282828;
+            color: #ffffff;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1DB954;
+            box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.2);
+        }
+
+        .btn {
+            background: #1DB954;
+            color: #000000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.3s;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            background: #1ed760;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: #b3b3b3;
+        }
+
+        .auth-switch a {
+            color: #1DB954;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        .camera-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .camera-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        #video {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 12px;
+            border: 3px solid #1DB954;
+            display: none;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .emotion-result {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: #282828;
+            border-radius: 12px;
+            display: none;
+            border-left: 4px solid #1DB954;
+        }
+
+        .emotion-result h2 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .emotion-emoji {
+            font-size: 80px;
+            margin: 20px 0;
+        }
+
+        .songs-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .songs-section h3 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .song-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .song-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .song-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .song-info {
+            flex: 1;
+        }
+
+        .song-name {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 3px;
+            font-size: 1rem;
+        }
+
+        .song-artist {
+            color: #b3b3b3;
+            font-size: 0.85rem;
+        }
+
+        .song-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .song-link {
+            background: #1DB954;
+            color: #000000;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .song-link:hover {
+            background: #1ed760;
+        }
+
+        .youtube-link {
+            background: #FF0000;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .youtube-link:hover {
+            background: #cc0000;
+        }
+
+        .spotify-embed {
+            width: 100%;
+            height: 80px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .song-link:hover {
+            background: #1ed760;
+            transform: scale(1.05);
+        }
+
+        .loading {
+            text-align: center;
+            color: #1DB954;
+            font-size: 18px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error {
+            background: #e22134;
+            color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+            text-align: center;
+        }
+
+        .success {
+            background: #1DB954;
+            color: #000000;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #b3b3b3;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            background: transparent;
+            color: #b3b3b3;
+            border: 1px solid #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #333;
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Authentication Container -->
+    <div class="container" id="authContainer">
+        <h1>🎵 Moodify</h1>
+        <p class="subtitle">Discover music that matches your mood!</p>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="auth-form">
+            <h2 style="text-align: center; color: #ffffff; margin-bottom: 20px;">Login to Your Account</h2>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+            </div>
+            <button class="btn" onclick="login()">Login</button>
+            <div class="auth-switch">
+                Don't have an account? <a onclick="showSignup()">Sign up</a>
+            </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signupForm" class="auth-form" style="display: none;">
+            <h2 style="text-align: center; color: #ffffff; margin-bottom: 20px;">Create an Account</h2>
+            <div class="form-group">
+                <label for="signupName">Full Name</label>
+                <input type="text" id="signupName" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="signupEmail">Email</label>
+                <input type="email" id="signupEmail" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" placeholder="Create a password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+            </div>
+            <button class="btn" onclick="signup()">Create Account</button>
+            <div class="auth-switch">
+                Already have an account? <a onclick="showLogin()">Login</a>
+            </div>
+        </div>
+
+        <div class="error" id="authError"></div>
+        <div class="success" id="authSuccess"></div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div class="container" id="appContainer">
+        <div class="user-info" id="userInfo">
+            Welcome, <span id="userName"></span>!
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <h1>🎵 Moodify</h1>
+        <p class="subtitle">Discover music that matches your mood!</p>
+
+        <div class="camera-section">
+            <div class="camera-container">
+                <video id="video" autoplay></video>
+            </div>
+            <canvas id="canvas"></canvas>
+            <br>
+            <button class="btn" id="startBtn" onclick="startCamera()">Start Camera</button>
+            <button class="btn" id="captureBtn" onclick="captureAndAnalyze()" style="display: none;">Capture &
+                Analyze</button>
+        </div>
+
+        <div class="loading" id="loading">
+            🔄 Analyzing your mood...
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="emotion-result" id="emotionResult">
+            <h2>Your Current Mood</h2>
+            <div class="emotion-emoji" id="emotionEmoji"></div>
+            <h3 id="emotionText"></h3>
+        </div>
+
+        <div class="songs-section" id="songsSection">
+            <h3>🎧 Recommended Songs for You</h3>
+            <div id="songsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Database simulation using localStorage
+        const DB_NAME = 'moodify_users';
+
+        // Initialize database if it doesn't exist
+        function initDatabase() {
+            if (!localStorage.getItem(DB_NAME)) {
+                localStorage.setItem(DB_NAME, JSON.stringify({}));
+            }
+        }
+
+        // Get all users from database
+        function getUsers() {
+            return JSON.parse(localStorage.getItem(DB_NAME) || '{}');
+        }
+
+        // Save user to database
+        function saveUser(email, userData) {
+            const users = getUsers();
+            users[email] = userData;
+            localStorage.setItem(DB_NAME, JSON.stringify(users));
+        }
+
+        // Check if user exists
+        function userExists(email) {
+            const users = getUsers();
+            return users.hasOwnProperty(email);
+        }
+
+        // Validate user credentials
+        function validateUser(email, password) {
+            const users = getUsers();
+            return users[email] && users[email].password === password;
+        }
+
+        // Get current user from session
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem('current_user') || 'null');
+        }
+
+        // Set current user in session
+        function setCurrentUser(user) {
+            localStorage.setItem('current_user', JSON.stringify(user));
+        }
+
+        // Clear current user from session
+        function clearCurrentUser() {
+            localStorage.removeItem('current_user');
+        }
+
+        // Helper to validate email format
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // DOM Elements
+        const authContainer = document.getElementById('authContainer');
+        const appContainer = document.getElementById('appContainer');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const authError = document.getElementById('authError');
+        const authSuccess = document.getElementById('authSuccess');
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let stream = null;
+
+        const emotionEmojis = {
+            'happy': '😊',
+            'sad': '😢',
+            'angry': '😠',
+            'neutral': '😐',
+            'surprise': '😲',
+            'fear': '😨',
+            'disgust': '🤢'
+        };
+
+        // Initialize the application
+        function initApp() {
+            initDatabase();
+
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                showApp(currentUser);
+            } else {
+                showAuth();
+            }
+        }
+
+        // Show authentication forms
+        function showAuth() {
+            authContainer.style.display = 'block';
+            appContainer.style.display = 'none';
+            hideAuthMessages();
+        }
+
+        // Show main application
+        function showApp(user) {
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'block';
+            userName.textContent = user.name;
+        }
+
+        // Show login form  
+        function showLogin() {
+            loginForm.style.display = 'block';
+            signupForm.style.display = 'none';
+            hideAuthMessages();
+        }
+
+        // Show signup form
+        function showSignup() {
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'block';
+            hideAuthMessages();
+        }
+
+        // Hide authentication messages
+        function hideAuthMessages() {
+            authError.style.display = 'none';
+            authSuccess.style.display = 'none';
+        }
+
+        // Show authentication error
+        function showAuthError(message) {
+            authError.textContent = message;
+            authError.style.display = 'block';
+            authSuccess.style.display = 'none';
+        }
+
+        // Show authentication success
+        function showAuthSuccess(message) {
+            authSuccess.textContent = message;
+            authSuccess.style.display = 'block';
+            authError.style.display = 'none';
+        }
+
+        // Login function
+        function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!email || !password) {
+                showAuthError('Please fill in all fields');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showAuthError('Please enter a valid email address');
+                return;
+            }
+
+            if (!validateUser(email, password)) {
+                showAuthError('Invalid email or password');
+                return;
+            }
+
+            const users = getUsers();
+            const user = users[email];
+            setCurrentUser(user);
+            showApp(user);
+        }
+
+        // Signup function
+        function signup() {
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+            if (!name || !email || !password || !confirmPassword) {
+                showAuthError('Please fill in all fields');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showAuthError('Please enter a valid email address');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAuthError('Passwords do not match');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('Password must be at least 6 characters long');
+                return;
+            }
+
+            if (userExists(email)) {
+                showAuthError('User with this email already exists');
+                return;
+            }
+
+            const userData = {
+                name: name,
+                email: email,
+                password: password,
+                createdAt: new Date().toISOString()
+            };
+
+            saveUser(email, userData);
+            showAuthSuccess('Account created successfully! Please login.');
+            showLogin();
+
+            // Clear signup form
+            document.getElementById('signupName').value = '';
+            document.getElementById('signupEmail').value = '';
+            document.getElementById('signupPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+
+        // Logout function
+        function logout() {
+            clearCurrentUser();
+            showAuth();
+
+            // Stop camera if running
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        // Camera functions
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('captureBtn').style.display = 'inline-block';
+            } catch (err) {
+                showError('Error accessing camera: ' + err.message);
+            }
+        }
+
+        async function captureAndAnalyze() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+
+            const imageData = canvas.toDataURL('image/jpeg');
+            const currentUser = getCurrentUser();
+            const userEmail = currentUser ? currentUser.email : 'anonymous';
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('emotionResult').style.display = 'none';
+            document.getElementById('songsSection').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: imageData,
+                        user_email: userEmail
+                    })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (data.success) {
+                    displayEmotion(data.emotion);
+                    displaySongs(data.songs);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (err) {
+                document.getElementById('loading').style.display = 'none';
+                showError('Error connecting to server: ' + err.message);
+            }
+        }
+
+
+        function displayEmotion(emotion) {
+            const emotionResult = document.getElementById('emotionResult');
+            const emotionEmoji = document.getElementById('emotionEmoji');
+            const emotionText = document.getElementById('emotionText');
+
+            emotionEmoji.textContent = emotionEmojis[emotion.toLowerCase()] || '😊';
+            emotionText.textContent = `You're feeling ${emotion}!`;
+            emotionResult.style.display = 'block';
+        }
+
+        function displaySongs(songs) {
+            const songsSection = document.getElementById('songsSection');
+            const songsList = document.getElementById('songsList');
+
+            songsList.innerHTML = '';
+
+            if (songs.length === 0) {
+                songsList.innerHTML = '<p>No songs found. Please check your Spotify API credentials.</p>';
+            } else {
+                // Add Spotify Embed for the first song to give a quick preview
+                try {
+                    const firstSong = songs[0];
+                    if (firstSong.spotify_url.includes('/track/')) {
+                        const trackId = firstSong.spotify_url.split('/track/')[1].split('?')[0];
+                        const embedDiv = document.createElement('div');
+                        embedDiv.className = 'spotify-embed';
+                        embedDiv.innerHTML = `
+                            <iframe src="https://open.spotify.com/embed/track/${trackId}" 
+                                    width="100%" height="80" frameBorder="0" allowtransparency="true" 
+                                    allow="encrypted-media"></iframe>
+                        `;
+                        songsList.appendChild(embedDiv);
+                    }
+                } catch (e) {
+                    console.error("Error creating Spotify embed:", e);
+                }
+
+                songs.forEach(song => {
+                    const songCard = document.createElement('div');
+                    songCard.className = 'song-card';
+
+                    songCard.innerHTML = `
+                        ${song.image ? `<img src="${song.image}" alt="${song.name}" class="song-image">` : ''}
+                        <div class="song-info">
+                            <div class="song-name">${song.name}</div>
+                            <div class="song-artist">${song.artist}</div>
+                        </div>
+                        <div class="song-actions">
+                            <a href="${song.spotify_url}" target="_blank" class="song-link">Spotify</a>
+                            <a href="${song.youtube_url}" target="_blank" class="youtube-link">YouTube</a>
+                        </div>
+                    `;
+
+                    songsList.appendChild(songCard);
+                });
+            }
+
+            songsSection.style.display = 'block';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Initialize the app when the page loads
+        window.onload = initApp;
+    </script>
+</body>
+
+</html>
